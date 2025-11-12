@@ -13,7 +13,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- Config ---
 ADMIN_KEY = os.getenv("ADMIN_KEY", "ZIONIX_KEY")
-BASE_URL = "https://zionix-panel.vercel.app"
+BASE_URL = "https://zionix-x-api.vercel.app"
 
 # ----------------- LOGIN -----------------
 @app.route("/", methods=["GET", "POST"])
