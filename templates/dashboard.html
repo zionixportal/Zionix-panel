@@ -1,0 +1,131 @@
+<!-- templates/dashboard.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dashboard — Zionix Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-slate-100">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-72 bg-white/5 p-6 flex flex-col gap-6 border-r border-white/5">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-lg font-bold">Z</div>
+        <div>
+          <div class="font-bold">Zionix Panel</div>
+          <div class="text-sm text-slate-400">Proxy manager</div>
+        </div>
+      </div>
+
+      <nav class="flex-1">
+        <a class="block py-2 px-3 rounded hover:bg-white/5 transition" href="#overview">Overview</a>
+        <a class="block py-2 px-3 rounded hover:bg-white/5 transition" href="#apis">APIs</a>
+        <a class="block py-2 px-3 rounded hover:bg-white/5 transition" href="#logs">Logs</a>
+        <a class="block py-2 px-3 rounded hover:bg-white/5 transition mt-4 text-sm text-slate-400" href="/logout">Logout</a>
+      </nav>
+
+      <div class="text-xs text-slate-400">
+        Made for Aditech • Minimal Modern • Smooth UI
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 p-8 overflow-auto">
+      <!-- Overview -->
+      <section id="overview" class="mb-6">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-semibold">Overview</h1>
+          <div class="text-sm text-slate-400">Welcome, Admin</div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4 mt-4">
+          <div class="card p-4 animate-card">
+            <div class="text-sm text-slate-400">Total APIs</div>
+            <div id="total" class="text-2xl font-bold">{{ total }}</div>
+          </div>
+          <div class="card p-4 animate-card">
+            <div class="text-sm text-slate-400">Active</div>
+            <div id="active" class="text-2xl font-bold text-emerald-400">{{ active }}</div>
+          </div>
+          <div class="card p-4 animate-card">
+            <div class="text-sm text-slate-400">Inactive</div>
+            <div id="inactive" class="text-2xl font-bold text-rose-400">{{ inactive }}</div>
+          </div>
+          <div class="card p-4 animate-card">
+            <div class="text-sm text-slate-400">Total Requests</div>
+            <div id="requests" class="text-2xl font-bold">{{ total_requests }}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- APIs -->
+      <section id="apis" class="mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold">APIs</h2>
+          <button id="openAdd" class="px-4 py-2 bg-indigo-500 rounded hover:bg-indigo-600 transition">Add new</button>
+        </div>
+
+        <div id="apisTable" class="space-y-3">
+          <!-- server rendered rows for no-js fallback -->
+          {% for a in apis %}
+          <div class="card p-3 flex items-center justify-between">
+            <div>
+              <div class="font-semibold">{{ a['name'] }}</div>
+              <div class="text-xs text-slate-400">{{ a['url_template'] }}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="text-sm text-slate-400">Key:</div>
+              <div class="bg-white/5 px-3 py-1 rounded text-sm">{{ a['api_key'] }}</div>
+              {% if a['active'] %}
+                <div class="text-emerald-300 font-semibold">Active</div>
+              {% else %}
+                <div class="text-rose-300 font-semibold">Inactive</div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Logs -->
+      <section id="logs">
+        <h2 class="text-lg font-semibold mb-3">Recent Logs</h2>
+        <div id="logsTable" class="space-y-2">
+          <!-- populated by JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add Modal (simple) -->
+  <div id="addModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4">
+    <div class="bg-slate-900 p-6 rounded w-full max-w-xl">
+      <h3 class="text-xl font-semibold mb-3">Add New Proxy</h3>
+      <div class="space-y-2">
+        <input id="a_name" placeholder="api name (e.g. mobile)" class="w-full p-3 bg-transparent border rounded">
+        <input id="a_tpl" placeholder="url template (use {term})" class="w-full p-3 bg-transparent border rounded">
+        <input id="a_key" placeholder="per-proxy API key (required)" class="w-full p-3 bg-transparent border rounded">
+        <div class="flex gap-2">
+          <select id="a_loc" class="p-2 rounded bg-transparent border">
+            <option value="query">query</option>
+            <option value="header">header</option>
+            <option value="cookie">cookie</option>
+          </select>
+          <input id="a_cookie" placeholder="cookie name (if cookie)" class="flex-1 p-2 bg-transparent border rounded">
+        </div>
+        <input id="a_strip" placeholder="strip fields (comma separated)" class="w-full p-3 bg-transparent border rounded">
+        <textarea id="a_add" placeholder='add fields JSON e.g. {"by":"Aditech"}' class="w-full p-3 bg-transparent border rounded"></textarea>
+        <input id="a_owner" placeholder="owner credit (kept private unless injected)" class="w-full p-3 bg-transparent border rounded">
+      </div>
+      <div class="mt-4 flex gap-2 justify-end">
+        <button onclick="closeAdd()" class="px-4 py-2 rounded border">Cancel</button>
+        <button onclick="doAdd()" class="px-4 py-2 bg-indigo-500 rounded">Add Proxy</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/panel.js"></script>
+</body>
+</html>
