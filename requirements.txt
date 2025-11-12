@@ -1,4 +1,4 @@
 flask
 flask-cors
 python-dotenv
-sqlite3-bro
+requests
