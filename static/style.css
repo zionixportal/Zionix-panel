@@ -1,18 +1,4 @@
-/* Clean modern styles for Option B */
-
-/* body already styled by Tailwind, add small tweaks */
-input, textarea, select {
-  background: #fff;
-  border: 1px solid #e6e6e6;
-  color: #0f172a;
-}
-
-/* card hover */
-.card { transition: transform .18s ease, box-shadow .18s ease; }
-.card:hover { transform: translateY(-6px); box-shadow: 0 8px 30px rgba(2,6,23,0.08); }
-
-/* modal backdrop */
-#addModal { backdrop-filter: blur(4px); }
-
-/* small helper */
-.font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace; }
+/* static/style.css - small polish */
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); border-radius:12px; box-shadow:0 6px 20px rgba(2,6,23,0.6);}
+.animate-card{transition:transform .18s ease, box-shadow .18s ease}
+.animate-card:hover{transform:translateY(-6px); box-shadow:0 12px 40px rgba(2,6,23,0.6);}
