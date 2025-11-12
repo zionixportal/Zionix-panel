@@ -1,143 +1,131 @@
-{% extends "base.html" %}
-{% block content %}
-
-<!-- Top -->
-<div class="flex items-center justify-between mb-8">
-  <div>
-    <h1 class="text-2xl font-semibold">Dashboard</h1>
-    <p class="text-sm text-slate-500 mt-1">Clean admin view — manage proxies, keys and expiry.</p>
-  </div>
-
-  <div class="flex items-center gap-3">
-    <div class="text-xs text-slate-500 mr-4">
-      Base: <span class="font-mono text-slate-700">{{ base_url }}</span>
-    </div>
-    <button onclick="openAddModal()" class="inline-flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-900">
-      + Add Proxy
-    </button>
-  </div>
-</div>
-
-<!-- Stats -->
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-  <div class="p-4 bg-white border rounded-lg shadow-sm">
-    <div class="text-sm text-slate-500">Total Proxies</div>
-    <div class="text-2xl font-medium mt-2">{{ total }}</div>
-  </div>
-  <div class="p-4 bg-white border rounded-lg shadow-sm">
-    <div class="text-sm text-slate-500">Active</div>
-    <div class="text-2xl text-emerald-600 font-medium mt-2">{{ active }}</div>
-  </div>
-  <div class="p-4 bg-white border rounded-lg shadow-sm">
-    <div class="text-sm text-slate-500">Inactive</div>
-    <div class="text-2xl text-rose-600 font-medium mt-2">{{ inactive }}</div>
-  </div>
-</div>
-
-<!-- Table -->
-<div class="bg-white border rounded-lg shadow-sm overflow-hidden">
-  <table class="min-w-full">
-    <thead class="bg-slate-50">
-      <tr>
-        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500">Name</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500">Status</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500">Key</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500">Proxy URL</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500">Created</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500">Expires</th>
-        <th class="px-4 py-3 text-right text-xs font-medium text-slate-500">Actions</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y">
-      {% for p in apis %}
-      <tr class="hover:bg-slate-50">
-        <td class="px-4 py-3 text-sm font-medium">{{ p.name }}</td>
-        <td class="px-4 py-3 text-sm">
-          {% if p.active %}
-            <span class="inline-flex items-center gap-2 px-2 py-1 rounded bg-emerald-50 text-emerald-700 text-xs">Active</span>
-          {% else %}
-            <span class="inline-flex items-center gap-2 px-2 py-1 rounded bg-rose-50 text-rose-700 text-xs">Inactive</span>
-          {% endif %}
-        </td>
-        <td class="px-4 py-3 text-sm font-mono">{{ p.api_key }}</td>
-        <td class="px-4 py-3 text-sm text-indigo-600 break-words">
-          {{ base_url }}/api/{{ p.api_key }}/{{ p.name }}/<span class="text-slate-400">{term}</span>
-        </td>
-        <td class="px-4 py-3 text-sm text-slate-500">{{ p.created_at or p.created }}</td>
-        <td class="px-4 py-3 text-sm text-slate-500">{{ p.expires_at or p.expires or '—' }}</td>
-        <td class="px-4 py-3 text-right">
-          <a href="/edit/{{ p.id }}" class="text-sm text-indigo-600 hover:underline mr-3">Edit</a>
-          <a href="/delete/{{ p.id }}" class="text-sm text-rose-600 hover:underline" onclick="return confirm('Delete proxy?')">Delete</a>
-        </td>
-      </tr>
-      {% else %}
-      <tr>
-        <td class="px-4 py-6 text-center text-sm text-slate-500" colspan="7">No proxies yet — add one with “Add Proxy”.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-<!-- Add Modal -->
-<div id="addModal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-medium">Create New Proxy</h3>
-      <button class="text-slate-500" onclick="closeAddModal()">✕</button>
-    </div>
-
-    <form method="POST" action="/create" class="grid grid-cols-1 gap-4">
-      <div>
-        <label class="text-sm text-slate-600">Name (slug)</label>
-        <input name="name" required class="mt-1 p-3 border rounded-md w-full" placeholder="e.g. mobile">
-      </div>
-
-      <div>
-        <label class="text-sm text-slate-600">Upstream URL (use {term})</label>
-        <input name="api_url" required class="mt-1 p-3 border rounded-md w-full" placeholder="https://example.com/api?term={term}">
-      </div>
-
-      <div class="flex gap-4">
-        <div class="flex-1">
-          <label class="text-sm text-slate-600">Per-proxy Key</label>
-          <input name="api_key" required class="mt-1 p-3 border rounded-md w-full" placeholder="unique key (e.g. MOB01)">
-        </div>
-        <div class="w-40">
-          <label class="text-sm text-slate-600">Duration (hours)</label>
-          <input name="duration" type="number" min="1" value="24" class="mt-1 p-3 border rounded-md w-full">
+<!-- templates/dashboard.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dashboard — Zionix Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-slate-100">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-72 bg-white/5 p-6 flex flex-col gap-6 border-r border-white/5">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-lg font-bold">Z</div>
+        <div>
+          <div class="font-bold">Zionix Panel</div>
+          <div class="text-sm text-slate-400">Proxy manager</div>
         </div>
       </div>
 
-      <div class="flex justify-end gap-3 pt-2">
-        <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-md border">Cancel</button>
-        <button type="submit" class="px-4 py-2 rounded-md bg-slate-800 text-white">Create Proxy</button>
+      <nav class="flex-1">
+        <a class="block py-2 px-3 rounded hover:bg-white/5 transition" href="#overview">Overview</a>
+        <a class="block py-2 px-3 rounded hover:bg-white/5 transition" href="#apis">APIs</a>
+        <a class="block py-2 px-3 rounded hover:bg-white/5 transition" href="#logs">Logs</a>
+        <a class="block py-2 px-3 rounded hover:bg-white/5 transition mt-4 text-sm text-slate-400" href="/logout">Logout</a>
+      </nav>
+
+      <div class="text-xs text-slate-400">
+        Made for Aditech • Minimal Modern • Smooth UI
       </div>
-    </form>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 p-8 overflow-auto">
+      <!-- Overview -->
+      <section id="overview" class="mb-6">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-semibold">Overview</h1>
+          <div class="text-sm text-slate-400">Welcome, Admin</div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4 mt-4">
+          <div class="card p-4 animate-card">
+            <div class="text-sm text-slate-400">Total APIs</div>
+            <div id="total" class="text-2xl font-bold">{{ total }}</div>
+          </div>
+          <div class="card p-4 animate-card">
+            <div class="text-sm text-slate-400">Active</div>
+            <div id="active" class="text-2xl font-bold text-emerald-400">{{ active }}</div>
+          </div>
+          <div class="card p-4 animate-card">
+            <div class="text-sm text-slate-400">Inactive</div>
+            <div id="inactive" class="text-2xl font-bold text-rose-400">{{ inactive }}</div>
+          </div>
+          <div class="card p-4 animate-card">
+            <div class="text-sm text-slate-400">Total Requests</div>
+            <div id="requests" class="text-2xl font-bold">{{ total_requests }}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- APIs -->
+      <section id="apis" class="mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold">APIs</h2>
+          <button id="openAdd" class="px-4 py-2 bg-indigo-500 rounded hover:bg-indigo-600 transition">Add new</button>
+        </div>
+
+        <div id="apisTable" class="space-y-3">
+          <!-- server rendered rows for no-js fallback -->
+          {% for a in apis %}
+          <div class="card p-3 flex items-center justify-between">
+            <div>
+              <div class="font-semibold">{{ a['name'] }}</div>
+              <div class="text-xs text-slate-400">{{ a['url_template'] }}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="text-sm text-slate-400">Key:</div>
+              <div class="bg-white/5 px-3 py-1 rounded text-sm">{{ a['api_key'] }}</div>
+              {% if a['active'] %}
+                <div class="text-emerald-300 font-semibold">Active</div>
+              {% else %}
+                <div class="text-rose-300 font-semibold">Inactive</div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Logs -->
+      <section id="logs">
+        <h2 class="text-lg font-semibold mb-3">Recent Logs</h2>
+        <div id="logsTable" class="space-y-2">
+          <!-- populated by JS -->
+        </div>
+      </section>
+    </main>
   </div>
-</div>
 
-<script>
-function openAddModal(){ document.getElementById('addModal').classList.remove('hidden'); }
-function closeAddModal(){ document.getElementById('addModal').classList.add('hidden'); }
-</script>
-
-{% endblock %}      </div>
-      <div class="flex justify-end space-x-3 pt-3">
-        <button type="button" onclick="closeAddModal()" class="text-gray-400 hover:text-gray-300">Cancel</button>
-        <button type="submit" class="bg-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-700">Add Proxy</button>
+  <!-- Add Modal (simple) -->
+  <div id="addModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4">
+    <div class="bg-slate-900 p-6 rounded w-full max-w-xl">
+      <h3 class="text-xl font-semibold mb-3">Add New Proxy</h3>
+      <div class="space-y-2">
+        <input id="a_name" placeholder="api name (e.g. mobile)" class="w-full p-3 bg-transparent border rounded">
+        <input id="a_tpl" placeholder="url template (use {term})" class="w-full p-3 bg-transparent border rounded">
+        <input id="a_key" placeholder="per-proxy API key (required)" class="w-full p-3 bg-transparent border rounded">
+        <div class="flex gap-2">
+          <select id="a_loc" class="p-2 rounded bg-transparent border">
+            <option value="query">query</option>
+            <option value="header">header</option>
+            <option value="cookie">cookie</option>
+          </select>
+          <input id="a_cookie" placeholder="cookie name (if cookie)" class="flex-1 p-2 bg-transparent border rounded">
+        </div>
+        <input id="a_strip" placeholder="strip fields (comma separated)" class="w-full p-3 bg-transparent border rounded">
+        <textarea id="a_add" placeholder='add fields JSON e.g. {"by":"Aditech"}' class="w-full p-3 bg-transparent border rounded"></textarea>
+        <input id="a_owner" placeholder="owner credit (kept private unless injected)" class="w-full p-3 bg-transparent border rounded">
       </div>
-    </form>
+      <div class="mt-4 flex gap-2 justify-end">
+        <button onclick="closeAdd()" class="px-4 py-2 rounded border">Cancel</button>
+        <button onclick="doAdd()" class="px-4 py-2 bg-indigo-500 rounded">Add Proxy</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-function openAddModal() {
-  document.getElementById('addModal').classList.remove('hidden');
-}
-function closeAddModal() {
-  document.getElementById('addModal').classList.add('hidden');
-}
-</script>
-
-{% endblock %}
+  <script src="/static/panel.js"></script>
+</body>
+</html>
