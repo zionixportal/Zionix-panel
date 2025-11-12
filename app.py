@@ -15,7 +15,7 @@ SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-ADMIN_SECRET = "aditya111"
+ADMIN_SECRET = "yuwer@3PxZ"
 ADMIN_SESSION_KEY = "is_admin"
 
 # ---------------- Decorators ----------------
