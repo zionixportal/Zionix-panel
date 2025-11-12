@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = "change_this_to_a_random_string_please"
 
 DB = "proxy_panel.db"
-ADMIN_SECRET = "aditya111"   # single secret key (change if you want)
+ADMIN_SECRET = "yuwer@3PxZ"   # single secret key (change if you want)
 ADMIN_SESSION_KEY = "is_admin"
 
 # ---------------- DB helpers ----------------
