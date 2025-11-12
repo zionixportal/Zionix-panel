@@ -115,4 +115,15 @@ async function loadLogs(){
   });
 }
 
+window.addEventListener('load', ()=>{ loadAll(); setInterval(loadAll,15000); });  const el = document.getElementById('logsTable');
+  el.innerHTML = '';
+  if(!Array.isArray(logs)) return;
+  logs.slice(0,50).forEach(l=>{
+    const div = document.createElement('div');
+    div.className = 'bg-white/3 p-3 rounded';
+    div.innerHTML = `<div class="text-sm">${l.created_at} • ${l.client_ip} • ${l.api_name||'-'} • ${l.apitype} • <strong>${l.status_code}</strong></div>`;
+    el.appendChild(div);
+  });
+}
+
 window.addEventListener('load', ()=>{ loadAll(); setInterval(loadAll,15000); });
