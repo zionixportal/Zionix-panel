@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Edit Proxy — {{ proxy.name if proxy else 'Not found' }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center">
+  <div class="bg-slate-800 p-6 rounded-lg w-full max-w-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold">Edit Proxy — {{ proxy.name }}</h2>
+      <a href="/dashboard" class="text-slate-300">← Back</a>
+    </div>
+
+    {% if not proxy %}
+      <div class="text-red-400">Proxy not found.</div>
+    {% else %}
+      <form method="POST" action="/edit/{{ proxy.id }}" class="space-y-3">
+        <div>
+          <label class="text-sm text-slate-300">Name</label>
+          <input name="name" value="{{ proxy.name }}" required class="w-full p-2 rounded bg-transparent border border-slate-700">
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-300">Per-proxy Key</label>
+          <input name="api_key" value="{{ proxy.api_key }}" required class="w-full p-2 rounded bg-transparent border border-slate-700">
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-300">Upstream URL (use {term})</label>
+          <input name="api_url" value="{{ proxy.api_url }}" required class="w-full p-2 rounded bg-transparent border border-slate-700">
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-300">Duration (hours)</label>
+          <input name="duration" type="number" min="1" value="24" class="w-32 p-2 rounded bg-transparent border border-slate-700">
+          <p class="text-xs text-slate-500 mt-1">Set how many hours from now this proxy will expire (updates expires_at).</p>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+          <a href="/dashboard" class="px-4 py-2 rounded border">Cancel</a>
+          <button class="px-4 py-2 bg-indigo-500 rounded">Save Changes</button>
+        </div>
+      </form>
+
+      <section class="mt-6 bg-white/3 p-3 rounded">
+        <div class="text-sm text-slate-300">Example Proxy URL</div>
+        <div class="font-mono mt-1">{{ base_url }}/api/{{ proxy.api_key }}/{{ proxy.name }}/<span class="text-slate-400">{term}</span></div>
+      </section>
+    {% endif %}
+  </div>
+</body>
+            </html>
