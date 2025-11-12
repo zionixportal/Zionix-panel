@@ -8,7 +8,8 @@ app = Flask(__name__)
 # change this to a stable secret in production
 app.secret_key = "change_this_to_a_random_string_please"
 
-DB = "proxy_panel.db"
+import tempfile
+DB = tempfile.gettempdir() + "/proxy_panel.db"
 ADMIN_SECRET = "yuwer@3PxZ"   # single secret key (change if you want)
 ADMIN_SESSION_KEY = "is_admin"
 
